@@ -15,7 +15,6 @@ import random
 import math
 from renderer import COLOUR_LIST, TEMPTING_TURQUOISE, BLACK
 
-
 HIGHLIGHT_COLOUR = TEMPTING_TURQUOISE
 FRAME_COLOUR = BLACK
 
@@ -84,7 +83,9 @@ class Block:
         and max_depth) to 0.  (All attributes can be updated later, as
         appropriate.)
         """
-        pass
+        self.level = level
+        self.colour = colour
+        self.children = children
 
     def rectangles_to_draw(self) -> List[Tuple[Tuple[int, int, int],
                                                Tuple[float, float],
@@ -215,6 +216,7 @@ def random_init(level: int, max_depth: int) -> 'Block':
 
 if __name__ == '__main__':
     import python_ta
+
     python_ta.check_all(config={
         'allowed-import-modules': [
             'doctest', 'python_ta', 'random', 'typing',
