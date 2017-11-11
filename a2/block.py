@@ -87,6 +87,10 @@ class Block:
         self.colour = colour
         self.children = children
 
+        self.position = (0, 0)
+        self.size = 0
+        self.max_depth = 0
+
     def rectangles_to_draw(self) -> List[Tuple[Tuple[int, int, int],
                                                Tuple[float, float],
                                                Tuple[float, float],
@@ -161,7 +165,21 @@ class Block:
         <top_left> is the (x, y) coordinates of the top left corner of
         this Block.  <size> is the height and width of this Block.
         """
-        pass
+        if self.children is not None and len(self.children) == 4:
+            self.children[0].position = top_left
+            self.children[0].size = size // 2
+
+            self.children[1].position = (top_left[0] + size // 2, top_left[1])
+            self.children[1].size = size // 2
+
+            self.children[2].position = (top_left[0], top_left[1] + size // 2)
+            self.children[2].size = size // 2
+
+            self.children[3].position = (top_left[0] + size // 2, top_left[1] + size // 2)
+            self.children[3].size = size // 2
+
+            for block in self.children:
+                block.update_block_locations(block.position, block.size)
 
     def get_selected_block(self, location: Tuple[float, float], level: int) \
             -> 'Block':
@@ -211,7 +229,15 @@ def random_init(level: int, max_depth: int) -> 'Block':
     # If this Block is not already at the maximum allowed depth, it can
     # be subdivided. Use a random number to decide whether or not to
     # subdivide it further.
-    pass
+    do_sub = random.random < math.exp(-.25 * level)
+    if not do_sub or level == max_depth:
+        return Block(level=level, colour=random.choice(COLOUR_LIST))
+    else:
+        blocks = [random_init(level + 1, max_depth),
+                  random_init(level + 1, max_depth),
+                  random_init(level + 1, max_depth),
+                  random_init(level + 1, max_depth)]
+        return Block(level=level, children=blocks)
 
 
 if __name__ == '__main__':
