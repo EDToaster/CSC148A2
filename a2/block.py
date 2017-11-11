@@ -13,7 +13,7 @@ This file contains the Block class, the main data structure used in the game.
 from typing import Optional, Tuple, List
 import random
 import math
-from renderer import COLOUR_LIST, TEMPTING_TURQUOISE, BLACK
+from renderer import COLOUR_LIST, TEMPTING_TURQUOISE, BLACK, colour_name
 
 HIGHLIGHT_COLOUR = TEMPTING_TURQUOISE
 FRAME_COLOUR = BLACK
@@ -85,15 +85,23 @@ class Block:
         """
         self.level = level
         self.colour = colour
-        self.children = children
+        if children is None:
+            self.children = []
+        else:
+            self.children = children
 
         self.position = (0, 0)
         self.size = 0
         self.max_depth = 0
 
+        self.highlighted = False
+
+        for block in self.children:
+            block.parent = self
+
     def rectangles_to_draw(self) -> List[Tuple[Tuple[int, int, int],
-                                               Tuple[float, float],
-                                               Tuple[float, float],
+                                               Tuple[int, int],
+                                               Tuple[int, int],
                                                int]]:
         """
         Return a list of tuples describing all of the rectangles to be drawn
@@ -121,7 +129,22 @@ class Block:
 
         The order of the rectangles does not matter.
         """
-        pass
+        list_return = []
+
+        if self.highlighted:
+            list_return.append(
+                (HIGHLIGHT_COLOUR, self.position, (self.size, self.size), 5))
+
+        if len(self.children) == 0:
+            list_return.append(
+                (self.colour, self.position, (self.size, self.size), 0))
+            list_return.append(
+                (FRAME_COLOUR, self.position, (self.size, self.size), 3))
+
+        else:
+            for block in self.children:
+                list_return.extend(block.rectangles_to_draw())
+        return list_return
 
     def swap(self, direction: int) -> None:
         """Swap the child Blocks of this Block.
@@ -139,7 +162,7 @@ class Block:
         """
         pass
 
-    def smash(self, max_depth: int) -> bool:
+    def smash(self) -> bool:
         """Smash this block.
 
         If this Block can be smashed,
@@ -154,8 +177,8 @@ class Block:
         """
         pass
 
-    def update_block_locations(self, top_left: Tuple[float, float],
-                               size: float) -> None:
+    def update_block_locations(self, top_left: Tuple[int, int],
+                               size: int) -> None:
         """
         Update the position and size of each of the Blocks within this Block.
 
@@ -165,23 +188,25 @@ class Block:
         <top_left> is the (x, y) coordinates of the top left corner of
         this Block.  <size> is the height and width of this Block.
         """
-        if self.children is not None and len(self.children) == 4:
-            self.children[0].position = top_left
-            self.children[0].size = size // 2
+        self.size = size
 
-            self.children[1].position = (top_left[0] + size // 2, top_left[1])
-            self.children[1].size = size // 2
+        if self.children is not None and len(self.children) == 4:
+            self.children[1].position = top_left
+            self.children[1].size = round(size / 2.0)
+
+            self.children[0].position = (top_left[0] + size // 2, top_left[1])
+            self.children[0].size = round(size / 2.0)
 
             self.children[2].position = (top_left[0], top_left[1] + size // 2)
-            self.children[2].size = size // 2
+            self.children[2].size = round(size / 2.0)
 
             self.children[3].position = (top_left[0] + size // 2, top_left[1] + size // 2)
-            self.children[3].size = size // 2
+            self.children[3].size = round(size / 2.0)
 
             for block in self.children:
                 block.update_block_locations(block.position, block.size)
 
-    def get_selected_block(self, location: Tuple[float, float], level: int) \
+    def get_selected_block(self, location: Tuple[int, int], level: int) \
             -> 'Block':
         """Return the Block within this Block that includes the given location
         and is at the given level. If the level specified is lower than
@@ -229,7 +254,7 @@ def random_init(level: int, max_depth: int) -> 'Block':
     # If this Block is not already at the maximum allowed depth, it can
     # be subdivided. Use a random number to decide whether or not to
     # subdivide it further.
-    do_sub = random.random < math.exp(-.25 * level)
+    do_sub = random.random() < math.exp(-.25 * level)
     if not do_sub or level == max_depth:
         return Block(level=level, colour=random.choice(COLOUR_LIST))
     else:
@@ -240,13 +265,109 @@ def random_init(level: int, max_depth: int) -> 'Block':
         return Block(level=level, children=blocks)
 
 
-if __name__ == '__main__':
-    import python_ta
+def attributes_str(b: Block, verbose) -> str:
+    """Return a str that is a concise representation of the attributes of <b>.
 
-    python_ta.check_all(config={
-        'allowed-import-modules': [
-            'doctest', 'python_ta', 'random', 'typing',
-            'block', 'goal', 'player', 'renderer', 'math'
-        ],
-        'max-attributes': 15
-    })
+    Include attributes position, size, and level.  If <verbose> is True,
+    also include highlighted, and max_depth.
+
+    Note: These are attributes that every Block has.
+    """
+    answer = f'pos={b.position}, size={b.size}, level={b.level}, '
+    if verbose:
+        answer += f'highlighted={b.highlighted}, max_depth={b.max_depth}'
+    return answer
+
+
+def print_block(b: Block, verbose=False) -> None:
+    """Print a text representation of Block <b>.
+
+    Include attributes position, size, and level.  If <verbose> is True,
+    also include highlighted, and max_depth.
+
+    Precondition: b is not None.
+    """
+    print_block_indented(b, 0, verbose)
+
+
+def print_block_indented(b: Block, indent: int, verbose) -> None:
+    """Print a text representation of Block <b>, indented <indent> steps.
+
+    Include attributes position, size, and level.  If <verbose> is True,
+    also include highlighted, and max_depth.
+
+    Precondition: b is not None.
+    """
+    if len(b.children) == 0:
+        # b a leaf.  Print its colour and other attributes
+        print(f'{"  " * indent}{colour_name(b.colour)}: ' +
+              f'{attributes_str(b, verbose)}')
+    else:
+        # b is not a leaf, so it doesn't have a colour.  Print its
+        # other attributes.  Then print its children.
+        print(f'{"  " * indent}{attributes_str(b, verbose)}')
+        for child in b.children:
+            print_block_indented(child, indent + 1, verbose)
+
+
+if __name__ == '__main__':
+    # import python_ta
+    # python_ta.check_all(config={
+    #     'allowed-io': ['print_block_indented'],
+    #     'allowed-import-modules': [
+    #         'doctest', 'python_ta', 'random', 'typing',
+    #         'block', 'goal', 'player', 'renderer', 'math'
+    #     ],
+    #     'max-attributes': 15
+    # })
+
+    # This tiny tree with one node will have no children, highlighted False,
+    # and will have the provided values for level and colour; the initializer
+    # sets all else (position, size, and max_depth) to 0.
+    b0 = Block(0, COLOUR_LIST[2])
+    # Now we update position and size throughout the tree.
+    b0.update_block_locations((0, 0), 750)
+    print("=== tiny tree ===")
+    # We have not set max_depth to anything meaningful, so it still has the
+    # value given by the initializer (0 and False).
+    print_block(b0, True)
+
+    b1 = Block(0, children=[
+        Block(1, children=[
+            Block(2, COLOUR_LIST[3]),
+            Block(2, COLOUR_LIST[2]),
+            Block(2, COLOUR_LIST[0]),
+            Block(2, COLOUR_LIST[0])
+        ]),
+        Block(1, COLOUR_LIST[2]),
+        Block(1, children=[
+            Block(2, COLOUR_LIST[1]),
+            Block(2, COLOUR_LIST[1]),
+            Block(2, COLOUR_LIST[2]),
+            Block(2, COLOUR_LIST[0])
+        ]),
+        Block(1, children=[
+            Block(2, COLOUR_LIST[0]),
+            Block(2, COLOUR_LIST[2]),
+            Block(2, COLOUR_LIST[3]),
+            Block(2, COLOUR_LIST[1])
+        ])
+    ])
+    b1.update_block_locations((0, 0), 750)
+    print("\n=== handmade tree ===")
+    # Similarly, max_depth is still 0 in this tree.  This violates the
+    # representation invariants of the class, so we shouldn't use such a
+    # tree in our real code, but we can use it to see what print_block
+    # does with a slightly bigger tree.
+    print_block(b1, True)
+
+    # Now let's make a random tree.
+    # random_init has the job of setting all attributes except position and
+    # size, so this time max_depth is set throughout the tree to the provided
+    # value (3 in this case).
+    b2 = random_init(0, 3)
+    # Now we update position and size throughout the tree.
+    b2.update_block_locations((0, 0), 750)
+    print("\n=== random tree ===")
+    # All attributes should have sensible values when we print this tree.
+    print_block(b2, True)
