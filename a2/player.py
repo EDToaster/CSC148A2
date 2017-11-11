@@ -198,6 +198,15 @@ class HumanPlayer(Player):
                     return 0
 
 
+class RandomPlayer(Player):
+    pass
+
+
+class SmartPlayer(Player):
+    def __init__(self, renderer: Renderer, player_id: int, goal: Goal, difficulty_level: int) -> None:
+        pass
+
+
 if __name__ == '__main__':
     import python_ta
 

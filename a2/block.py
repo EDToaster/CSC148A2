@@ -223,7 +223,53 @@ class Block:
         Preconditions:
         - 0 <= level <= max_depth
         """
-        pass
+        print(location, level)
+
+        locx = location[0]
+        locy = location[1]
+
+        posx = self.position[0]
+        posy = self.position[1]
+
+        if posx <= locx <= posx + self.size and posy <= locy <= posy + self.size:
+            if level == self.level or (level > self.level and len(self.children) == 0):
+                return self
+            else:
+                child0 = self.children[0].get_selected_block(location, level)
+                child1 = self.children[1].get_selected_block(location, level)
+                child2 = self.children[2].get_selected_block(location, level)
+                child3 = self.children[3].get_selected_block(location, level)
+
+                if child0 is not None:
+                    return child0
+                elif child1 is not None:
+                    return child1
+                elif child2 is not None:
+                    return child2
+                elif child3 is not None:
+                    return child3
+                return None
+        else:
+            return None
+
+
+            # if level == self.level or (level > self.level and len(self.children) == 0):
+
+
+            # elif len(self.children) == 4:
+            #     child0 = self.children[0].get_selected_block(location, level)
+            #     child1 = self.children[1].get_selected_block(location, level)
+            #     child2 = self.children[2].get_selected_block(location, level)
+            #     child3 = self.children[3].get_selected_block(location, level)
+            #
+            #     if child0 is not None:
+            #         return child0
+            #     elif child1 is not None:
+            #         return child1
+            #     elif child2 is not None:
+            #         return child2
+            #     elif child3 is not None:
+            #         return child3
 
     def flatten(self) -> List[List[Tuple[int, int, int]]]:
         """Return a two-dimensional list representing this Block as rows
