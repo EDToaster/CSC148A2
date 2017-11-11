@@ -72,9 +72,25 @@ class BlobGoal(Goal):
         """
         pass
 
+    def score(self, board: Block) -> int:
+        return 148
+
+
+class PerimeterGoal(Goal):
+    """"""
+
+    def _undiscovered_perimeter_size(self) -> int:
+        """
+        """
+        pass
+
+    def score(self, board: Block) -> int:
+        return 148
+
 
 if __name__ == '__main__':
     import python_ta
+
     python_ta.check_all(config={
         'allowed-import-modules': [
             'doctest', 'python_ta', 'random', 'typing',

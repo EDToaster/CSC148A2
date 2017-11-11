@@ -157,7 +157,7 @@ class HumanPlayer(Player):
                 if self.num_smashes >= self.MAX_SMASHES:
                     print('Can\'t smash again!')
                     return 0
-                if block.smash(board.max_depth):
+                if block.smash():
                     self.num_smashes += 1
                     return 1
                 else:
@@ -200,6 +200,7 @@ class HumanPlayer(Player):
 
 if __name__ == '__main__':
     import python_ta
+
     python_ta.check_all(config={
         'allowed-io': ['process_event'],
         'allowed-import-modules': [
