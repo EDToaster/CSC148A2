@@ -152,7 +152,18 @@ class Block:
         If <direction> is 1, swap vertically.  If <direction> is 0, swap
         horizontally. If this Block has no children, do nothing.
         """
-        pass
+        if len(self.children) == 4:
+            child0 = self.children[0]
+            child1 = self.children[1]
+            child2 = self.children[2]
+            child3 = self.children[3]
+
+            if direction == 1:
+                self.children = [child3, child2, child1, child0]
+            elif direction == 0:
+                self.children = [child1, child0, child3, child2]
+
+        self.update_block_locations(self.position, self.size)
 
     def rotate(self, direction: int) -> None:
         """Rotate this Block and all its descendants.
@@ -160,7 +171,18 @@ class Block:
         If <direction> is 1, rotate clockwise.  If <direction> is 3, rotate
         counterclockwise. If this Block has no children, do nothing.
         """
-        pass
+        if len(self.children) == 4:
+            child0 = self.children[0]
+            child1 = self.children[1]
+            child2 = self.children[2]
+            child3 = self.children[3]
+
+            if direction == 1:
+                self.children = [child1, child2, child3, child0]
+            elif direction == 3:
+                self.children = [child3, child0, child1, child2]
+
+        self.update_block_locations(self.position, self.size)
 
     def smash(self) -> bool:
         """Smash this block.
@@ -175,7 +197,19 @@ class Block:
 
         Return True if this Block was smashed and False otherwise.
         """
-        pass
+        if self.level == self.max_depth:
+            return False
+
+        else:  # TODO: Maybe make less ugly
+            self.children = [random_init(self.level, self.max_depth),
+                             random_init(self.level, self.max_depth),
+                             random_init(self.level, self.max_depth),
+                             random_init(self.level, self.max_depth)]
+            # FIXME: Something tells me max depth is ignored
+            self.update_block_locations(self.position, self.size)
+            return True
+
+
 
     def update_block_locations(self, top_left: Tuple[int, int],
                                size: int) -> None:
@@ -200,7 +234,8 @@ class Block:
             self.children[2].position = (top_left[0], top_left[1] + size // 2)
             self.children[2].size = round(size / 2.0)
 
-            self.children[3].position = (top_left[0] + size // 2, top_left[1] + size // 2)
+            self.children[3].position = (
+                top_left[0] + size // 2, top_left[1] + size // 2)
             self.children[3].size = round(size / 2.0)
 
             for block in self.children:
@@ -232,7 +267,8 @@ class Block:
         posy = self.position[1]
 
         if posx <= locx <= posx + self.size and posy <= locy <= posy + self.size:
-            if level == self.level or (level > self.level and len(self.children) == 0):
+            if level == self.level or (
+                            level > self.level and len(self.children) == 0):
                 return self
             else:
                 child0 = self.children[0].get_selected_block(location, level)
