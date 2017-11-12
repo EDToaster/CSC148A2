@@ -21,6 +21,8 @@ from goal import BlobGoal, PerimeterGoal
 from player import Player, HumanPlayer, RandomPlayer, SmartPlayer
 from renderer import Renderer, COLOUR_LIST, colour_name, BOARD_WIDTH
 
+GOALS = (BlobGoal, PerimeterGoal)
+
 
 class Game:
     """A game of Blocky.
@@ -55,15 +57,27 @@ class Game:
         self.board.update_block_locations((0, 0), BOARD_WIDTH)
 
         self.players = []
+
         self.players.extend(
-            [HumanPlayer(self.renderer, i, BlobGoal(random.choice(COLOUR_LIST))) for i in range(num_human)])
+            [HumanPlayer(
+                self.renderer,
+                i,
+                random.choice(GOALS)(random.choice(COLOUR_LIST))) for i in
+                range(num_human)])
+
         self.players.extend(
-            [HumanPlayer(self.renderer, i + num_human, BlobGoal(random.choice(COLOUR_LIST))) for i in
-             range(random_players)])
+            [HumanPlayer(
+                self.renderer,
+                i + num_human,
+                random.choice(GOALS)(random.choice(COLOUR_LIST))) for i in
+                range(random_players)])
+
         self.players.extend(
-            [HumanPlayer(self.renderer, i + num_human + random_players, BlobGoal(random.choice(COLOUR_LIST))) for
-             i, j in
-             enumerate(smart_players)])
+            [HumanPlayer(
+                self.renderer,
+                i + num_human + random_players,
+                random.choice(GOALS)(random.choice(COLOUR_LIST))) for i, j in
+                enumerate(smart_players)])
 
     def run_game(self, num_turns: int) -> None:
         """Run the game for the number of turns specified.
@@ -152,5 +166,5 @@ if __name__ == '__main__':
     # })
     # sample_game()
     # auto_game()
-    two_player_game()
-    # solitaire_game()
+    # two_player_game()
+    solitaire_game()

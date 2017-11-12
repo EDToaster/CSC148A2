@@ -172,15 +172,10 @@ class Block:
         counterclockwise. If this Block has no children, do nothing.
         """
         if len(self.children) == 4:
-            child0 = self.children[0]
-            child1 = self.children[1]
-            child2 = self.children[2]
-            child3 = self.children[3]
+            self.children = rotate_list(self.children, direction - 2)
 
-            if direction == 1:
-                self.children = [child1, child2, child3, child0]
-            elif direction == 3:
-                self.children = [child3, child0, child1, child2]
+            for child in self.children:
+                child.rotate(direction)
 
         self.update_block_locations(self.position, self.size)
 
@@ -200,16 +195,13 @@ class Block:
         if self.level == self.max_depth:
             return False
 
-        else:  # TODO: Maybe make less ugly
+        else:
             self.children = [random_init(self.level, self.max_depth),
                              random_init(self.level, self.max_depth),
                              random_init(self.level, self.max_depth),
                              random_init(self.level, self.max_depth)]
-            # FIXME: Something tells me max depth is ignored
             self.update_block_locations(self.position, self.size)
             return True
-
-
 
     def update_block_locations(self, top_left: Tuple[int, int],
                                size: int) -> None:
@@ -288,25 +280,6 @@ class Block:
         else:
             return None
 
-
-            # if level == self.level or (level > self.level and len(self.children) == 0):
-
-
-            # elif len(self.children) == 4:
-            #     child0 = self.children[0].get_selected_block(location, level)
-            #     child1 = self.children[1].get_selected_block(location, level)
-            #     child2 = self.children[2].get_selected_block(location, level)
-            #     child3 = self.children[3].get_selected_block(location, level)
-            #
-            #     if child0 is not None:
-            #         return child0
-            #     elif child1 is not None:
-            #         return child1
-            #     elif child2 is not None:
-            #         return child2
-            #     elif child3 is not None:
-            #         return child3
-
     def flatten(self) -> List[List[Tuple[int, int, int]]]:
         """Return a two-dimensional list representing this Block as rows
         and columns of unit cells.
@@ -320,6 +293,26 @@ class Block:
         L[0][0] represents the unit cell in the upper left corner of the Block.
         """
         pass
+
+    def set_max_depth(self, max_depth: int) -> "Block":
+        """Sets the max depth of the block, and returns itself
+        :param max_depth: max_depth of the block
+        :return: itself
+        """
+        self.max_depth = max_depth
+        return self
+
+
+def rotate_list(block_list: List["Block"], n: int) -> List["Block"]:
+    """Non-mutating helper function to rotate a list,
+    returns a rotated list that moves the 0th index up <n> elements
+
+    (positive n: CCW, negative n: CW) in the context of the game
+
+    :param block_list: the list to rotate
+    :param n: the number of indices to move
+    """
+    return block_list[-n % len(block_list):] + block_list[:-n % len(block_list)]
 
 
 def random_init(level: int, max_depth: int) -> 'Block':
@@ -338,13 +331,13 @@ def random_init(level: int, max_depth: int) -> 'Block':
     # subdivide it further.
     do_sub = random.random() < math.exp(-.25 * level)
     if not do_sub or level == max_depth:
-        return Block(level=level, colour=random.choice(COLOUR_LIST))
+        return Block(level=level, colour=random.choice(COLOUR_LIST)).set_max_depth(max_depth)
     else:
         blocks = [random_init(level + 1, max_depth),
                   random_init(level + 1, max_depth),
                   random_init(level + 1, max_depth),
                   random_init(level + 1, max_depth)]
-        return Block(level=level, children=blocks)
+        return Block(level=level, children=blocks).set_max_depth(max_depth)
 
 
 def attributes_str(b: Block, verbose) -> str:
