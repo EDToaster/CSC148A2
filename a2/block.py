@@ -196,10 +196,11 @@ class Block:
             return False
 
         else:
-            self.children = [random_init(self.level, self.max_depth),
-                             random_init(self.level, self.max_depth),
-                             random_init(self.level, self.max_depth),
-                             random_init(self.level, self.max_depth)]
+            next_depth = self.max_depth - 1
+            self.children = [random_init(self.level, next_depth),
+                             random_init(self.level, next_depth),
+                             random_init(self.level, next_depth),
+                             random_init(self.level, next_depth)]
             self.update_block_locations(self.position, self.size)
             return True
 
