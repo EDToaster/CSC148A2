@@ -192,7 +192,7 @@ class Block:
 
         Return True if this Block was smashed and False otherwise.
         """
-        if self.level >= self.max_depth:
+        if self.level == self.max_depth:
             return False
 
         else:
