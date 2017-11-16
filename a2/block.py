@@ -196,11 +196,10 @@ class Block:
             return False
 
         else:
-            next_depth = self.max_depth - 1
-            self.children = [random_init(self.level, next_depth),
-                             random_init(self.level, next_depth),
-                             random_init(self.level, next_depth),
-                             random_init(self.level, next_depth)]
+            self.children = [random_init(self.level + 1, self.max_depth),
+                             random_init(self.level + 1, self.max_depth),
+                             random_init(self.level + 1, self.max_depth),
+                             random_init(self.level + 1, self.max_depth)]
             self.update_block_locations(self.position, self.size)
             return True
 
@@ -253,33 +252,27 @@ class Block:
         """
         print(location, level)
 
-        locx = location[0]
-        locy = location[1]
-
-        posx = self.position[0]
-        posy = self.position[1]
-
-        if posx <= locx <= posx + self.size and posy <= locy <= posy + self.size:
+        if location in self:
             if level == self.level or (
                             level > self.level and len(self.children) == 0):
                 return self
             else:
-                child0 = self.children[0].get_selected_block(location, level)
-                child1 = self.children[1].get_selected_block(location, level)
-                child2 = self.children[2].get_selected_block(location, level)
-                child3 = self.children[3].get_selected_block(location, level)
-
-                if child0 is not None:
-                    return child0
-                elif child1 is not None:
-                    return child1
-                elif child2 is not None:
-                    return child2
-                elif child3 is not None:
-                    return child3
-                return None
+                for i in range(4):
+                    if location in self.children[i]:
+                        return self.children[i].get_selected_block(location, level)
+                return self
         else:
-            return None
+            return self
+
+    def __contains__(self, loc: Tuple[int, int]) -> bool:
+        """Returns whether the <loc> is within the
+        bounds of the <self> block
+        """
+        posx = self.position[0]
+        posy = self.position[1]
+        locx = loc[0]
+        locy = loc[1]
+        return posx <= locx <= posx + self.size and posy <= locy <= posy + self.size
 
     def flatten(self) -> List[List[Tuple[int, int, int]]]:
         """Return a two-dimensional list representing this Block as rows
