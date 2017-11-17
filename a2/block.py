@@ -259,7 +259,8 @@ class Block:
             else:
                 for i in range(4):
                     if location in self.children[i]:
-                        return self.children[i].get_selected_block(location, level)
+                        return self.children[i].get_selected_block(location,
+                                                                   level)
                 return self
         else:
             return self
@@ -272,7 +273,8 @@ class Block:
         posy = self.position[1]
         locx = loc[0]
         locy = loc[1]
-        return posx <= locx <= posx + self.size and posy <= locy <= posy + self.size
+        return posx <= locx <= posx + self.size and \
+               posy <= locy <= posy + self.size
 
     def flatten(self) -> List[List[Tuple[int, int, int]]]:
         """Return a two-dimensional list representing this Block as rows
@@ -286,7 +288,42 @@ class Block:
 
         L[0][0] represents the unit cell in the upper left corner of the Block.
         """
-        pass
+
+        # FIXME: I'm ugly and unreadable :(
+
+        if self.children == []:
+            d = self.max_depth
+            l = self.level
+            row_list = [self.colour]
+            while d > l:
+                row_list.extend(row_list)
+                l += 1
+
+            l = self.level
+            column_list = [row_list]
+            while d > l:
+                column_list.extend(column_list)
+                l += 1
+
+            return column_list
+
+        else:
+
+            output = []
+            child0_flat = self.children[0].flatten()
+            child1_flat = self.children[1].flatten()
+            child2_flat = self.children[2].flatten()
+            child3_flat = self.children[3].flatten()
+
+            for i in range(len(child1_flat)):
+                child0_flat[i].extend(child1_flat[i])
+
+            for i in range(len(child3_flat)):
+                child2_flat[i].extend(child3_flat[i])
+
+            output.extend(child0_flat)
+            output.extend(child2_flat)
+            return output
 
     def set_max_depth(self, max_depth: int) -> "Block":
         """Sets the max depth of the block, and returns itself
@@ -325,7 +362,8 @@ def random_init(level: int, max_depth: int) -> 'Block':
     # subdivide it further.
     do_sub = random.random() < math.exp(-.25 * level)
     if not do_sub or level == max_depth:
-        return Block(level=level, colour=random.choice(COLOUR_LIST)).set_max_depth(max_depth)
+        return Block(level=level,
+                     colour=random.choice(COLOUR_LIST)).set_max_depth(max_depth)
     else:
         blocks = [random_init(level + 1, max_depth),
                   random_init(level + 1, max_depth),

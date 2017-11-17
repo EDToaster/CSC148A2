@@ -85,7 +85,24 @@ class PerimeterGoal(Goal):
         pass
 
     def score(self, board: Block) -> int:
-        return 148
+        score = 0
+        flat_block = board.flatten()
+        block_diameter = len(flat_block)
+
+        for i in range(block_diameter):
+            if flat_block[0][i] == self.colour:
+                score += 1
+
+            if flat_block[i][0] == self.colour:
+                score += 1
+
+            if flat_block[block_diameter - 1][i] == self.colour:
+                score += 1
+
+            if flat_block[i][block_diameter - 1] == self.colour:
+                score += 1
+
+        return score
 
 
 if __name__ == '__main__':
