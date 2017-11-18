@@ -315,13 +315,13 @@ class Block:
             child2_flat = self.children[2].flatten()
             child3_flat = self.children[3].flatten()
 
-            for i in range(len(child1_flat)):
-                child0_flat[i].extend(child1_flat[i])
+            for i in range(len(child0_flat)):
+                child1_flat[i].extend(child0_flat[i])
 
-            for i in range(len(child3_flat)):
+            for i in range(len(child2_flat)):
                 child2_flat[i].extend(child3_flat[i])
 
-            output.extend(child0_flat)
+            output.extend(child1_flat)
             output.extend(child2_flat)
             return output
 
