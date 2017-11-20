@@ -192,7 +192,7 @@ class Block:
 
         Return True if this Block was smashed and False otherwise.
         """
-        if self.level == self.max_depth:
+        if self.level == self.max_depth or self.level == 0:
             return False
 
         else:
@@ -250,7 +250,7 @@ class Block:
         Preconditions:
         - 0 <= level <= max_depth
         """
-        print(location, level)
+        # print(location, level)
 
         if location in self:
             if level == self.level or (
@@ -302,12 +302,13 @@ class Block:
         else:
             flat_children = [child.flatten() for child in self.children]
             child0_3 = flat_children[0]
-            for i in range(len(flat_children[0])):
-                child0_3[i].extend(flat_children[3][i])
-
             child1_2 = flat_children[1]
+
+            # Blocks should all have same number of columns so one loop works
             for i in range(len(flat_children[1])):
                 child1_2[i].extend(flat_children[2][i])
+                child0_3[i].extend(flat_children[3][i])
+
 
             child1_2.extend(child0_3)
             return child1_2

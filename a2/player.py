@@ -136,7 +136,7 @@ class HumanPlayer(Player):
             return 1
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                if block.parent is not None:
+                if block.level != 0:
                     self._level -= 1
                 return None
 
