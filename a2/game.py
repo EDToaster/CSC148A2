@@ -62,7 +62,7 @@ class Game:
             [HumanPlayer(
                 self.renderer,
                 i,
-                random.choice(GOALS)(random.choice(COLOUR_LIST))) for i in
+                BlobGoal(random.choice(COLOUR_LIST))) for i in
                 range(num_human)])
 
         self.players.extend(

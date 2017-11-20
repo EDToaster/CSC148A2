@@ -70,10 +70,57 @@ class BlobGoal(Goal):
         Update <visited> so that all cells that are visited are marked with
         either 0 or 1.
         """
-        pass
+        stack = [None]
+
+        current = pos
+
+        count = 0
+
+        while current is not None:
+            x = pos[0]
+            y = pos[1]
+
+            stack.append(current)
+
+            if board[x][y] == self.colour:
+                if visited[x][y] == -1:
+                    count += 1
+                visited[x][y] = 1
+
+                if y > 0 \
+                        and visited[x][y - 1] == -1 \
+                        and board[x][y - 1] == self.colour:
+                    current = (x, y - 1)
+                elif y < len(board[0]) - 1 \
+                        and visited[x][y + 1] == -1 \
+                        and board[x][y + 1] == self.colour:
+                    current = (x, y + 1)
+                elif x > 0 \
+                        and visited[x - 1][y] == -1 \
+                        and board[x - 1][y] == self.colour:
+                    current = (x - 1, y)
+                elif x < len(board) - 1 \
+                        and visited[x + 1][y] == -1 \
+                        and board[x + 1][y] == self.colour:
+                    current = (x + 1, y)
+                else:
+                    current = stack.pop()
+            else:
+                visited[x][y] = 0
+                current = stack.pop()
+        return count
 
     def score(self, board: Block) -> int:
-        return 148
+
+        currentScore = 0
+
+        flattened = board.flatten()
+        for x, item in enumerate(flattened):
+            for y in range(len(item)):
+                visited = [[-1 for i in range(len(flattened))] for j in
+                           range(len(flattened))]
+                currentScore = max(self._undiscovered_blob_size((x, y), flattened, visited), currentScore)
+        return currentScore
 
 
 class PerimeterGoal(Goal):
@@ -88,6 +135,7 @@ class PerimeterGoal(Goal):
         score = 0
         flat_block = board.flatten()
         block_diameter = len(flat_block)
+        scores = [0, 0, 0, 0]
 
         for i in range(block_diameter):
             if flat_block[0][i] == self.colour:

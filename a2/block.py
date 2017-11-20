@@ -288,42 +288,47 @@ class Block:
 
         L[0][0] represents the unit cell in the upper left corner of the Block.
         """
-
-        # FIXME: I'm ugly and unreadable :(
-
+        # if self.children == []:
+        #     d = self.max_depth
+        #     lev = self.level
+        #     row_list = [self.colour]
+        #     while d > lev:
+        #         row_list += row_list
+        #         lev += 1
+        #
+        #     levv = self.level
+        #     column_list = [row_list]
+        #     while d > levv:
+        #         column_list += column_list
+        #         levv += 1
+        #
+        #     return column_list
         if self.children == []:
-            d = self.max_depth
-            l = self.level
-            row_list = [self.colour]
-            while d > l:
-                row_list.extend(row_list)
-                l += 1
+            offset = self.max_depth - self.level
+            split = 2 ** offset
 
-            l = self.level
-            column_list = [row_list]
-            while d > l:
-                column_list.extend(column_list)
-                l += 1
-
-            return column_list
-
+            out = []
+            for i in range(split):
+                inner = []
+                for j in range(split):
+                    inner.append(self.colour)
+                out.append(inner)
+            return out
         else:
+            flat_children = [child.flatten() for child in self.children]
+            child0_3 = flat_children[0]
+            for i in range(len(flat_children[0])):
+                child0_3[i].extend(flat_children[3][i])
 
-            output = []
-            child0_flat = self.children[0].flatten()
-            child1_flat = self.children[1].flatten()
-            child2_flat = self.children[2].flatten()
-            child3_flat = self.children[3].flatten()
+            child1_2 = flat_children[1]
+            for i in range(len(flat_children[1])):
+                child1_2[i].extend(flat_children[2][i])
 
-            for i in range(len(child0_flat)):
-                child1_flat[i].extend(child0_flat[i])
+            child0_3.extend(child1_2)
+            return child0_3
 
-            for i in range(len(child2_flat)):
-                child2_flat[i].extend(child3_flat[i])
 
-            output.extend(child1_flat)
-            output.extend(child2_flat)
-            return output
+
 
     def set_max_depth(self, max_depth: int) -> "Block":
         """Sets the max depth of the block, and returns itself
