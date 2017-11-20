@@ -136,7 +136,7 @@ class HumanPlayer(Player):
             return 1
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                if block.parent is not None:
+                if block.level != 0:
                     self._level -= 1
                 return None
 
@@ -199,12 +199,75 @@ class HumanPlayer(Player):
 
 
 class RandomPlayer(Player):
-    pass
+    # TODO: Document ME!
+    """Random Player
+
+    """
+
+    smash_available: bool
+
+    # TODO: Maybe change names?
+    ACTIONS = [
+        "LEFT-RT", "RIGHT-RT", "VERT-SW", "HORI-SW", "SMASH"]
+
+    def __init__(self, renderer: Renderer, player_id: int, goal: Goal) -> None:
+        """Initialize this HumanPlayer with the given <renderer>, <player_id>
+        and <goal>.
+        """
+
+        super().__init__(renderer, player_id, goal)
+        self.smash_available = True
+
+
+    def make_move(self, board: Block) -> int:
+        self.renderer.draw(board, self.id)
+        selected_block = choose_random_block(board)
+        selected_block.highlighted = True
+        self.renderer.draw(board, self.id)
+
+        pygame.time.wait(TIME_DELAY)
+        available_actions = self.ACTIONS
+        if self.smash_available and selected_block.level != 0:
+            available_actions.append("SMASH")
+
+        action = random.choice(available_actions)
+
+        if action == "SMASH":
+            self.smash_available = False
+            selected_block.smash()
+        elif action == "RIGHT-RT":
+            selected_block.rotate(1)
+        elif action == "LEFT-RT":
+            selected_block.rotate(3)
+        elif action == "HORI-SW":
+            selected_block.swap(0)
+        elif action == "VERT-SW":
+            selected_block.swap(1)
+
+        selected_block.highlighted = False
+        return 0
+
+
 
 
 class SmartPlayer(Player):
-    def __init__(self, renderer: Renderer, player_id: int, goal: Goal, difficulty_level: int) -> None:
+    def __init__(self, renderer: Renderer, player_id: int, goal: Goal,
+                 difficulty_level: int) -> None:
         pass
+
+
+def choose_random_block(board: Block) -> Block:
+
+    # TODO: Think about a good way to implement this
+    action = random.randint(0, 4)
+
+    if action == 4 or board.children == []:
+        if not hasattr(board, "parent"):
+            return board
+        else:
+            return board.parent
+    else:
+        return choose_random_block(board.children[action])
 
 
 if __name__ == '__main__':

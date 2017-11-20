@@ -66,11 +66,11 @@ class Game:
                 range(num_human)])
 
         self.players.extend(
-            [HumanPlayer(
+            [RandomPlayer(
                 self.renderer,
                 i + num_human,
-                random.choice(GOALS)(random.choice(COLOUR_LIST))) for i in
-                range(random_players)])
+                random.choice(GOALS)(random.choice(COLOUR_LIST)))
+                for i in range(random_players)])
 
         self.players.extend(
             [HumanPlayer(
@@ -154,6 +154,12 @@ def sample_game() -> None:
     game = Game(5, 1, 1, [6])
     game.run_game(3)
 
+def random_game() -> None:
+    """Run a sample game with 2 random players
+    """
+    # random.seed(1001)
+    game = Game(4, 0, 3, [])
+    game.run_game(10)
 
 if __name__ == '__main__':
     # import python_ta
@@ -167,4 +173,4 @@ if __name__ == '__main__':
     # sample_game()
     # auto_game()
     # two_player_game()
-    solitaire_game()
+    random_game()

@@ -84,13 +84,17 @@ class BlobGoal(Goal):
                 count += 1
             visited[x][y] = 1
 
-            if y >= 1 and visited[x][y - 1] == -1 and board[x][y - 1] == self.colour:
+            if y >= 1 and visited[x][y - 1] == -1 and board[x][
+                        y - 1] == self.colour:
                 current = (x, y - 1)
-            elif y <= len(board) - 2 and visited[x][y + 1] == -1 and board[x][y + 1] == self.colour:
+            elif y <= len(board) - 2 and visited[x][y + 1] == -1 and board[x][
+                        y + 1] == self.colour:
                 current = (x, y + 1)
-            elif x >= 1 and visited[x - 1][y] == -1 and board[x - 1][y] == self.colour:
+            elif x >= 1 and visited[x - 1][y] == -1 and board[x - 1][
+                y] == self.colour:
                 current = (x - 1, y)
-            elif x <= len(board) - 2 and visited[x + 1][y] == -1 and board[x + 1][y] == self.colour:
+            elif x <= len(board) - 2 and visited[x + 1][y] == -1 and \
+                            board[x + 1][y] == self.colour:
                 current = (x + 1, y)
             else:
                 stack.pop()
@@ -150,7 +154,9 @@ class BlobGoal(Goal):
             for y in range(len(item)):
                 visited = [[-1 for i in range(len(flattened))] for j in
                            range(len(flattened))]
-                current_score = max(self._undiscovered_blob_size((x, y), flattened, visited), current_score)
+                current_score = max(
+                    self._undiscovered_blob_size((x, y), flattened, visited),
+                    current_score)
         return current_score
 
     def description(self) -> str:
