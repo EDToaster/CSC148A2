@@ -70,57 +70,93 @@ class BlobGoal(Goal):
         Update <visited> so that all cells that are visited are marked with
         either 0 or 1.
         """
-        stack = [None]
 
         current = pos
-
+        stack = [None]
         count = 0
-
+        if board[pos[0]][pos[1]] != self.colour:
+            return count
         while current is not None:
-            x = pos[0]
-            y = pos[1]
-
+            x = current[0]
+            y = current[1]
             stack.append(current)
+            if visited[x][y] == -1:
+                count += 1
+            visited[x][y] = 1
 
-            if board[x][y] == self.colour:
-                if visited[x][y] == -1:
-                    count += 1
-                visited[x][y] = 1
-
-                if y > 0 \
-                        and visited[x][y - 1] == -1 \
-                        and board[x][y - 1] == self.colour:
-                    current = (x, y - 1)
-                elif y < len(board[0]) - 1 \
-                        and visited[x][y + 1] == -1 \
-                        and board[x][y + 1] == self.colour:
-                    current = (x, y + 1)
-                elif x > 0 \
-                        and visited[x - 1][y] == -1 \
-                        and board[x - 1][y] == self.colour:
-                    current = (x - 1, y)
-                elif x < len(board) - 1 \
-                        and visited[x + 1][y] == -1 \
-                        and board[x + 1][y] == self.colour:
-                    current = (x + 1, y)
-                else:
-                    current = stack.pop()
+            if y >= 1 and visited[x][y - 1] == -1 and board[x][y - 1] == self.colour:
+                current = (x, y - 1)
+            elif y <= len(board) - 2 and visited[x][y + 1] == -1 and board[x][y + 1] == self.colour:
+                current = (x, y + 1)
+            elif x >= 1 and visited[x - 1][y] == -1 and board[x - 1][y] == self.colour:
+                current = (x - 1, y)
+            elif x <= len(board) - 2 and visited[x + 1][y] == -1 and board[x + 1][y] == self.colour:
+                current = (x + 1, y)
             else:
-                visited[x][y] = 0
+                stack.pop()
                 current = stack.pop()
+
         return count
+
+
+
+
+        # stack = [None]
+        #
+        # current = pos
+        #
+        # count = 0
+        #
+        # while current is not None:
+        #     x = pos[0]
+        #     y = pos[1]
+        #
+        #     stack.append(current)
+        #
+        #     if board[x][y] == self.colour:
+        #         if visited[x][y] == -1:
+        #             count += 1
+        #         visited[x][y] = 1
+        #
+        #         if y > 0 \
+        #                 and visited[x][y - 1] == -1 \
+        #                 and board[x][y - 1] == self.colour:
+        #             current = (x, y - 1)
+        #         elif y < len(board[0]) - 1 \
+        #                 and visited[x][y + 1] == -1 \
+        #                 and board[x][y + 1] == self.colour:
+        #             current = (x, y + 1)
+        #         elif x > 0 \
+        #                 and visited[x - 1][y] == -1 \
+        #                 and board[x - 1][y] == self.colour:
+        #             current = (x - 1, y)
+        #         elif x < len(board) - 1 \
+        #                 and visited[x + 1][y] == -1 \
+        #                 and board[x + 1][y] == self.colour:
+        #             current = (x + 1, y)
+        #         else:
+        #             current = stack.pop()
+        #     else:
+        #         visited[x][y] = 0
+        #         current = stack.pop()
+        # return count
 
     def score(self, board: Block) -> int:
 
-        currentScore = 0
+        current_score = 0
 
         flattened = board.flatten()
         for x, item in enumerate(flattened):
             for y in range(len(item)):
                 visited = [[-1 for i in range(len(flattened))] for j in
                            range(len(flattened))]
-                currentScore = max(self._undiscovered_blob_size((x, y), flattened, visited), currentScore)
-        return currentScore
+                current_score = max(self._undiscovered_blob_size((x, y), flattened, visited), current_score)
+        return current_score
+
+    def description(self) -> str:
+        """Return a description of this goal.
+        """
+        return "Create the biggest blob"
 
 
 class PerimeterGoal(Goal):
@@ -151,6 +187,11 @@ class PerimeterGoal(Goal):
                 score += 1
 
         return score
+
+    def description(self) -> str:
+        """Return a description of this goal.
+        """
+        return "Get the most of your colour, on the outer edges of the game board"
 
 
 if __name__ == '__main__':

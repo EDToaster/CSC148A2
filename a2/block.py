@@ -288,21 +288,6 @@ class Block:
 
         L[0][0] represents the unit cell in the upper left corner of the Block.
         """
-        # if self.children == []:
-        #     d = self.max_depth
-        #     lev = self.level
-        #     row_list = [self.colour]
-        #     while d > lev:
-        #         row_list += row_list
-        #         lev += 1
-        #
-        #     levv = self.level
-        #     column_list = [row_list]
-        #     while d > levv:
-        #         column_list += column_list
-        #         levv += 1
-        #
-        #     return column_list
         if self.children == []:
             offset = self.max_depth - self.level
             split = 2 ** offset
@@ -324,11 +309,8 @@ class Block:
             for i in range(len(flat_children[1])):
                 child1_2[i].extend(flat_children[2][i])
 
-            child0_3.extend(child1_2)
-            return child0_3
-
-
-
+            child1_2.extend(child0_3)
+            return child1_2
 
     def set_max_depth(self, max_depth: int) -> "Block":
         """Sets the max depth of the block, and returns itself
