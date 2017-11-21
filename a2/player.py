@@ -208,7 +208,7 @@ class RandomPlayer(Player):
 
     # TODO: Maybe change names?
     ACTIONS = [
-        "LEFT-RT", "RIGHT-RT", "VERT-SW", "HORI-SW", "SMASH"]
+        "LEFT-RT", "RIGHT-RT", "VERT-SW", "HORI-SW"]
 
     def __init__(self, renderer: Renderer, player_id: int, goal: Goal) -> None:
         """Initialize this HumanPlayer with the given <renderer>, <player_id>
@@ -226,11 +226,12 @@ class RandomPlayer(Player):
         self.renderer.draw(board, self.id)
 
         pygame.time.wait(TIME_DELAY)
-        available_actions = self.ACTIONS
+        available_actions = [] + self.ACTIONS
         if self.smash_available and selected_block.level != 0:
             available_actions.append("SMASH")
 
         action = random.choice(available_actions)
+        print(action)
 
         if action == "SMASH":
             self.smash_available = False
@@ -263,7 +264,10 @@ def choose_random_block(board: Block) -> Block:
 
     if action == 4 or board.children == []:
         if not hasattr(board, "parent"):
-            return board
+            try:
+                return board.children[random.randint(0,3)]
+            except IndexError:
+                return board
         else:
             return board.parent
     else:

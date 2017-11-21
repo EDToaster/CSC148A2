@@ -62,7 +62,7 @@ class Game:
             [HumanPlayer(
                 self.renderer,
                 i,
-                BlobGoal(random.choice(COLOUR_LIST))) for i in
+                PerimeterGoal(random.choice(COLOUR_LIST))) for i in
                 range(num_human)])
 
         self.players.extend(
@@ -159,7 +159,7 @@ def random_game() -> None:
     """
     # random.seed(1001)
     game = Game(4, 0, 3, [])
-    game.run_game(10)
+    game.run_game(50)
 
 if __name__ == '__main__':
     # import python_ta

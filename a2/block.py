@@ -309,12 +309,11 @@ class Block:
                 child1_2[i].extend(flat_children[2][i])
                 child0_3[i].extend(flat_children[3][i])
 
-
             child1_2.extend(child0_3)
             return child1_2
 
     def set_max_depth(self, max_depth: int) -> "Block":
-        """Sets the max depth of the block, and returns itself
+        """Sets the max depth of thhe block, and returns itself
         :param max_depth: max_depth of the block
         :return: itself
         """
