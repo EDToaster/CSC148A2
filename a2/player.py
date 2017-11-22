@@ -218,7 +218,6 @@ class RandomPlayer(Player):
         super().__init__(renderer, player_id, goal)
         self.smash_available = True
 
-
     def make_move(self, board: Block) -> int:
         self.renderer.draw(board, self.id)
         selected_block = choose_random_block(board)
@@ -249,8 +248,6 @@ class RandomPlayer(Player):
         return 0
 
 
-
-
 class SmartPlayer(Player):
     def __init__(self, renderer: Renderer, player_id: int, goal: Goal,
                  difficulty_level: int) -> None:
@@ -258,17 +255,29 @@ class SmartPlayer(Player):
 
 
 def choose_random_block(board: Block) -> Block:
+    """Chooses a random block from the board
 
-    # TODO: Think about a good way to implement this
+    """
+    # This function does not simply pick a random block,
+    # the algorith was adjusted to exlude some but not all useless moves,
+    # in order to make the random plays seem more "organic"
+    #
+    # The function will never select the deepest block, even though some useless
+    # moves will still be done. Some blocks are intentionally and indirectrly
+    # prioritized.
+
     action = random.randint(0, 4)
 
     if action == 4 or board.children == []:
         if not hasattr(board, "parent"):
-            try:
-                return board.children[random.randint(0,3)]
-            except IndexError:
-                return board
+            if board.level == 0:
+                # We don't want the "motherblock" to be picked very often,
+                # makes it look boring
+                return board.children[random.randint(0, 3)]
+            else:
+                return board  # FIXME: This should never happen
         else:
+            # this allows the "motherblock" to still be picked some times
             return board.parent
     else:
         return choose_random_block(board.children[action])
