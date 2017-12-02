@@ -62,6 +62,7 @@ class Block:
         - its colour is not None
     - level <= max_depth
     """
+
     position: Tuple[int, int]
     size: int
     colour: Optional[Tuple[int, int, int]]
@@ -85,7 +86,9 @@ class Block:
         """
         self.level = level
         self.colour = colour
+
         if children is None:
+            # self.children is NEVER None
             self.children = []
         else:
             self.children = children
@@ -96,8 +99,7 @@ class Block:
 
         self.highlighted = False
 
-        for block in self.children:
-            block.parent = self
+        self.set_childrens_parent()
 
     def rectangles_to_draw(self) -> List[Tuple[Tuple[int, int, int],
                                                Tuple[int, int],
@@ -187,7 +189,7 @@ class Block:
         had child Blocks, discard them.)
         Ensure that the RI's of the Blocks remain satisfied.
 
-        A Block can be smashed iff it is not the top-level Block and it
+        A Block can be smashed <==> it is not the top-level Block and it
         is not already at the level of the maximum depth.
 
         Return True if this Block was smashed and False otherwise.
@@ -196,12 +198,15 @@ class Block:
             return False
 
         else:
-            self.children = [random_init(self.level + 1, self.max_depth),
-                             random_init(self.level + 1, self.max_depth),
-                             random_init(self.level + 1, self.max_depth),
-                             random_init(self.level + 1, self.max_depth)]
+            self.children = \
+                [random_init(self.level + 1, self.max_depth) for _ in range(4)]
+            self.set_childrens_parent()
             self.update_block_locations(self.position, self.size)
             return True
+
+    def set_childrens_parent(self):
+        for child in self.children:
+            child.parent = self
 
     def update_block_locations(self, top_left: Tuple[int, int],
                                size: int) -> None:
@@ -258,6 +263,7 @@ class Block:
                 return self
             else:
                 for i in range(4):
+                    # uses custom dunder method __contains__
                     if location in self.children[i]:
                         return self.children[i].get_selected_block(location,
                                                                    level)
@@ -273,8 +279,8 @@ class Block:
         posy = self.position[1]
         locx = loc[0]
         locy = loc[1]
-        return posx <= locx <= posx + self.size and \
-               posy <= locy <= posy + self.size
+
+        return posx <= locx <= posx + self.size and posy <= locy <= posy + self.size
 
     def flatten(self) -> List[List[Tuple[int, int, int]]]:
         """Return a two-dimensional list representing this Block as rows
@@ -288,7 +294,7 @@ class Block:
 
         L[0][0] represents the unit cell in the upper left corner of the Block.
         """
-        if self.children == []:
+        if not self.children:  # checks if empty
             offset = self.max_depth - self.level
             split = 2 ** offset
 
@@ -352,10 +358,7 @@ def random_init(level: int, max_depth: int) -> 'Block':
         return Block(level=level,
                      colour=random.choice(COLOUR_LIST)).set_max_depth(max_depth)
     else:
-        blocks = [random_init(level + 1, max_depth),
-                  random_init(level + 1, max_depth),
-                  random_init(level + 1, max_depth),
-                  random_init(level + 1, max_depth)]
+        blocks = [random_init(level + 1, max_depth) for _ in range(4)]
         return Block(level=level, children=blocks).set_max_depth(max_depth)
 
 

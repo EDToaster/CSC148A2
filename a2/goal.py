@@ -69,6 +69,9 @@ class BlobGoal(Goal):
 
         Update <visited> so that all cells that are visited are marked with
         either 0 or 1.
+
+        Uses a depth first search with a
+        recursive backtracking maze generation algorithm
         """
 
         current = pos
@@ -94,7 +97,7 @@ class BlobGoal(Goal):
                 y] == self.colour:
                 current = (x - 1, y)
             elif x <= len(board) - 2 and visited[x + 1][y] == -1 and \
-                            board[x + 1][y] == self.colour:
+                    board[x + 1][y] == self.colour:
                 current = (x + 1, y)
             else:
                 stack.pop()
@@ -102,76 +105,37 @@ class BlobGoal(Goal):
 
         return count
 
-
-
-
-        # stack = [None]
-        #
-        # current = pos
-        #
-        # count = 0
-        #
-        # while current is not None:
-        #     x = pos[0]
-        #     y = pos[1]
-        #
-        #     stack.append(current)
-        #
-        #     if board[x][y] == self.colour:
-        #         if visited[x][y] == -1:
-        #             count += 1
-        #         visited[x][y] = 1
-        #
-        #         if y > 0 \
-        #                 and visited[x][y - 1] == -1 \
-        #                 and board[x][y - 1] == self.colour:
-        #             current = (x, y - 1)
-        #         elif y < len(board[0]) - 1 \
-        #                 and visited[x][y + 1] == -1 \
-        #                 and board[x][y + 1] == self.colour:
-        #             current = (x, y + 1)
-        #         elif x > 0 \
-        #                 and visited[x - 1][y] == -1 \
-        #                 and board[x - 1][y] == self.colour:
-        #             current = (x - 1, y)
-        #         elif x < len(board) - 1 \
-        #                 and visited[x + 1][y] == -1 \
-        #                 and board[x + 1][y] == self.colour:
-        #             current = (x + 1, y)
-        #         else:
-        #             current = stack.pop()
-        #     else:
-        #         visited[x][y] = 0
-        #         current = stack.pop()
-        # return count
-
     def score(self, board: Block) -> int:
 
         current_score = 0
 
         flattened = board.flatten()
+
+        visited = [[-1 for _ in range(len(flattened))] for _ in
+                   range(len(flattened))]
+
         for x, item in enumerate(flattened):
             for y in range(len(item)):
-                visited = [[-1 for i in range(len(flattened))] for j in
-                           range(len(flattened))]
-                current_score = max(
-                    self._undiscovered_blob_size((x, y), flattened, visited),
-                    current_score)
+                # if current position is unchecked, check it.
+                # Since the recursive backtracker algorithm
+                # is exhaustive for all cells
+                # two checks within the same blocks
+                # is guaranteed to have the same
+                # score
+                if visited[x][y] == -1:
+                    current_score = max(
+                        self._undiscovered_blob_size((x, y), flattened, visited),
+                        current_score)
         return current_score
 
     def description(self) -> str:
         """Return a description of this goal.
         """
-        return "Create the biggest blob"
+        return "Create the biggest blob!"
 
 
 class PerimeterGoal(Goal):
     """"""
-
-    def _undiscovered_perimeter_size(self) -> int:
-        """
-        """
-        pass
 
     def score(self, board: Block) -> int:
         score = 0
@@ -197,7 +161,7 @@ class PerimeterGoal(Goal):
     def description(self) -> str:
         """Return a description of this goal.
         """
-        return "Get the most of your colour, on the outer edges of the game board"
+        return "Get the most of your color on the edge of the board!"
 
 
 if __name__ == '__main__':

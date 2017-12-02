@@ -52,32 +52,54 @@ class Game:
         Precondition:
             2 <= max_depth <= 5
         """
-        self.renderer = Renderer(num_human + random_players + len(smart_players))
+        # Initialize renderer
+        self.renderer = Renderer(num_players=num_human + random_players + len(smart_players))
+
+        # Generate and update board
         self.board = random_init(0, max_depth)
         self.board.update_block_locations((0, 0), BOARD_WIDTH)
 
+        # Generate a random goal for all players
+        goal = random.choice(GOALS)
+
         self.players = []
-
-        self.players.extend(
-            [HumanPlayer(
+        # Generate and add some HumanPlayers
+        id_offset = 0
+        human_list: List[HumanPlayer] = [
+            HumanPlayer(
                 self.renderer,
-                i,
-                PerimeterGoal(random.choice(COLOUR_LIST))) for i in
-                range(num_human)])
+                i + id_offset,
+                goal(random.choice(COLOUR_LIST)))
+            # iterate <num_human> times
+            for i in range(num_human)
+        ]
+        self.players.extend(human_list)
 
-        self.players.extend(
-            [RandomPlayer(
+        # Generate and add some RandomPlayers
+        id_offset += num_human
+        random_list: List[RandomPlayer] = [
+            RandomPlayer(
                 self.renderer,
-                i + num_human,
-                random.choice(GOALS)(random.choice(COLOUR_LIST)))
-                for i in range(random_players)])
+                i + id_offset,
+                goal(random.choice(COLOUR_LIST)))
+            # iterate <random_players> times
+            for i in range(random_players)
+        ]
+        self.players.extend(random_list)
 
-        self.players.extend(
-            [HumanPlayer(
+        # Generate and add some SmartPlayers according to
+        # their corresponding difficulty levels
+        id_offset += random_players
+        smart_list: List[SmartPlayer] = [
+            SmartPlayer(
                 self.renderer,
-                i + num_human + random_players,
-                random.choice(GOALS)(random.choice(COLOUR_LIST))) for i, j in
-                enumerate(smart_players)])
+                i + id_offset,
+                goal(random.choice(COLOUR_LIST)), difficulty)
+            # iterates <len(smart_players)> times,
+            # capturing difficulty levels
+            for i, difficulty in enumerate(smart_players)
+        ]
+        self.players.extend(smart_list)
 
     def run_game(self, num_turns: int) -> None:
         """Run the game for the number of turns specified.
@@ -154,12 +176,14 @@ def sample_game() -> None:
     game = Game(5, 1, 1, [6])
     game.run_game(3)
 
+
 def random_game() -> None:
     """Run a sample game with 2 random players
     """
     # random.seed(1001)
     game = Game(4, 0, 3, [])
     game.run_game(50)
+
 
 if __name__ == '__main__':
     # import python_ta

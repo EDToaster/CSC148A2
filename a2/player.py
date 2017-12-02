@@ -46,6 +46,7 @@ class Player:
         self.goal = goal
         self.renderer = renderer
         self.id = player_id
+        renderer.display_goal(self)
 
     def make_move(self, board: Block) -> int:
         """Choose a move to make on the given board, and apply it, mutating
@@ -199,16 +200,12 @@ class HumanPlayer(Player):
 
 
 class RandomPlayer(Player):
-    # TODO: Document ME!
-    """Random Player
-
+    """A Player that chooses from 5 random moves and
+    executes it.
+    This player has no intelligence
     """
 
     smash_available: bool
-
-    # TODO: Maybe change names?
-    ACTIONS = [
-        "LEFT-RT", "RIGHT-RT", "VERT-SW", "HORI-SW"]
 
     def __init__(self, renderer: Renderer, player_id: int, goal: Goal) -> None:
         """Initialize this HumanPlayer with the given <renderer>, <player_id>
@@ -219,22 +216,36 @@ class RandomPlayer(Player):
         self.smash_available = True
 
     def make_move(self, board: Block) -> int:
-        self.renderer.draw(board, self.id)
+        """Selects a random move and executes it on the board.
+        Always returns 0: Successful
+        """
+
+        # select and highlight a random block
         selected_block = choose_random_block(board)
         selected_block.highlighted = True
+
+        # draw with highlight
         self.renderer.draw(board, self.id)
 
         pygame.time.wait(TIME_DELAY)
-        available_actions = [] + self.ACTIONS
+
+        # add available moves
+        available_actions = [
+            "LEFT-RT", "RIGHT-RT", "VERT-SW", "HORI-SW"]
+
+        # add SMASH if it is a valid move
         if self.smash_available and selected_block.level != 0:
             available_actions.append("SMASH")
 
         action = random.choice(available_actions)
-        print(action)
 
         if action == "SMASH":
-            self.smash_available = False
+            # no need to check if valid move because
+            # we guaranteed it already.
             selected_block.smash()
+            self.smash_available = False
+
+        # apply each move
         elif action == "RIGHT-RT":
             selected_block.rotate(1)
         elif action == "LEFT-RT":
@@ -244,40 +255,108 @@ class RandomPlayer(Player):
         elif action == "VERT-SW":
             selected_block.swap(1)
 
+        # un-highlight and draw
         selected_block.highlighted = False
+        self.renderer.draw(board, self.id)
+
         return 0
 
 
 class SmartPlayer(Player):
+    """A Smart player generates multiple (based on difficulty level) moves
+    and selects the highest scoring move.
+    """
+    difficulty_level: int
+
     def __init__(self, renderer: Renderer, player_id: int, goal: Goal,
                  difficulty_level: int) -> None:
-        pass
+        super().__init__(renderer, player_id, goal)
+        self.difficulty_level = difficulty_level
+
+    def make_move(self, board: Block):
+        num_moves: int = \
+            5 if self.difficulty_level == 0 else \
+            10 if self.difficulty_level == 1 else \
+            25 if self.difficulty_level == 2 else \
+            50 if self.difficulty_level == 3 else \
+            100 if self.difficulty_level == 4 else \
+            150
+
+
+
+        best_score: int = -1
+        best_action: tuple
+        best_block: Block
+
+        for _ in range(num_moves):
+            random_block: Block = choose_random_block(board)
+            # add available moves based on random_block
+            available_actions = \
+                [
+                    (random_block.rotate, 1),
+                    (random_block.rotate, 3),
+                    (random_block.swap, 0),
+                    (random_block.swap, 1)
+                ]
+
+            choice = random.randint(0, 3)
+            action = available_actions[choice]
+
+            # get inverse choice to undo later
+            # if choice is rotate, pick other rotate to undo
+            # if choice is swap, swap again to undo
+            inverse_choice = \
+                0 if choice == 1 else\
+                1 if choice == 0 else\
+                choice
+            inverse_action = available_actions[inverse_choice]
+
+            # execute the specified action
+            action[0](action[1])
+
+            current_score = self.goal.score(board)
+            if current_score > best_score:
+                best_action = action
+                best_block = random_block
+
+            # execute inverse action
+            inverse_action[0](inverse_action[1])
+
+        # Highlight and draw
+        best_block.highlighted = True
+        self.renderer.draw(board, self.id)
+
+        pygame.time.wait(TIME_DELAY)
+
+        # Do best move
+        best_action[0](best_action[1])
+
+        # Un-highlight and draw
+        self.renderer.draw(board, self.id)
+        best_block.highlighted = False
 
 
 def choose_random_block(board: Block) -> Block:
-    """Chooses a random block from the board
-
+    """Chooses a random block from the board, excluding
+    useless moves.
     """
     # This function does not simply pick a random block,
-    # the algorith was adjusted to exlude some but not all useless moves,
+    # the algorithm was adjusted to exclude some but not all useless moves,
     # in order to make the random plays seem more "organic"
     #
     # The function will never select the deepest block, even though some useless
-    # moves will still be done. Some blocks are intentionally and indirectrly
+    # moves will still be done. Some blocks are intentionally and indirectly
     # prioritized.
 
     action = random.randint(0, 4)
 
-    if action == 4 or board.children == []:
+    if action == 4 or not board.children:
         if not hasattr(board, "parent"):
-            if board.level == 0:
-                # We don't want the "motherblock" to be picked very often,
-                # makes it look boring
-                return board.children[random.randint(0, 3)]
-            else:
-                return board  # FIXME: This should never happen
+            # We don't want the "root block" to be picked very often,
+            # makes it look boring
+            return board.children[random.randint(0, 3)]
         else:
-            # this allows the "motherblock" to still be picked some times
+            # this allows the "root block" to still be picked some times
             return board.parent
     else:
         return choose_random_block(board.children[action])
