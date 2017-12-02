@@ -21,8 +21,6 @@ from goal import BlobGoal, PerimeterGoal
 from player import Player, HumanPlayer, RandomPlayer, SmartPlayer
 from renderer import Renderer, COLOUR_LIST, colour_name, BOARD_WIDTH
 
-GOALS = (BlobGoal, PerimeterGoal)
-
 
 class Game:
     """A game of Blocky.
@@ -52,15 +50,19 @@ class Game:
         Precondition:
             2 <= max_depth <= 5
         """
+
+        goals = (BlobGoal, PerimeterGoal)
+
+        total_num = num_human + random_players + len(smart_players)
         # Initialize renderer
-        self.renderer = Renderer(num_players=num_human + random_players + len(smart_players))
+        self.renderer = Renderer(total_num)
 
         # Generate and update board
         self.board = random_init(0, max_depth)
         self.board.update_block_locations((0, 0), BOARD_WIDTH)
 
         # Generate a random goal for all players
-        goal = random.choice(GOALS)
+        goal = random.choice(goals)
 
         self.players = []
         # Generate and add some HumanPlayers
@@ -160,6 +162,14 @@ def two_player_game() -> None:
     game.run_game(5)
 
 
+def two_player_custom_game() -> None:
+    """Run a game with two human players.
+    """
+    random.seed(134563)
+    game = Game(4, 2, 0, [])
+    game.run_game(10)
+
+
 def solitaire_game() -> None:
     """Run a game with one human player.
     """
@@ -186,15 +196,13 @@ def random_game() -> None:
 
 
 if __name__ == '__main__':
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'allowed-io': ['run_game'],
-    #     'allowed-import-modules': [
-    #         'doctest', 'python_ta', 'random', 'typing',
-    #         'block', 'goal', 'player', 'renderer'
-    #     ],
-    # })
-    # sample_game()
-    # auto_game()
-    # two_player_game()
-    random_game()
+    import python_ta
+
+    python_ta.check_all(config={
+        'allowed-io': ['run_game'],
+        'allowed-import-modules': [
+            'doctest', 'python_ta', 'random', 'typing',
+            'block', 'goal', 'player', 'renderer'
+        ],
+    })
+    two_player_custom_game()

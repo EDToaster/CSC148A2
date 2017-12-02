@@ -205,6 +205,8 @@ class Block:
             return True
 
     def set_childrens_parent(self):
+        """Set the parent attribute
+        of each child of self block"""
         for child in self.children:
             child.parent = self
 
@@ -255,20 +257,19 @@ class Block:
         Preconditions:
         - 0 <= level <= max_depth
         """
-        # print(location, level)
 
-        if location in self:
-            if level == self.level or (
-                            level > self.level and len(self.children) == 0):
-                return self
-            else:
-                for i in range(4):
-                    # uses custom dunder method __contains__
-                    if location in self.children[i]:
-                        return self.children[i].get_selected_block(location,
-                                                                   level)
-                return self
+        if location not in self:
+            return self
+
+        if level == self.level or (
+                level > self.level and len(self.children) == 0):
+            return self
         else:
+            for i in range(4):
+                # uses custom dunder method __contains__
+                if location in self.children[i]:
+                    return self.children[i].get_selected_block(location,
+                                                               level)
             return self
 
     def __contains__(self, loc: Tuple[int, int]) -> bool:
@@ -280,7 +281,9 @@ class Block:
         locx = loc[0]
         locy = loc[1]
 
-        return posx <= locx <= posx + self.size and posy <= locy <= posy + self.size
+        return \
+            posx <= locx <= posx + self.size \
+            and posy <= locy <= posy + self.size
 
     def flatten(self) -> List[List[Tuple[int, int, int]]]:
         """Return a two-dimensional list representing this Block as rows
@@ -299,9 +302,9 @@ class Block:
             split = 2 ** offset
 
             out = []
-            for i in range(split):
+            for _ in range(split):
                 inner = []
-                for j in range(split):
+                for __ in range(split):
                     inner.append(self.colour)
                 out.append(inner)
             return out
@@ -408,15 +411,16 @@ def print_block_indented(b: Block, indent: int, verbose) -> None:
 
 
 if __name__ == '__main__':
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'allowed-io': ['print_block_indented'],
-    #     'allowed-import-modules': [
-    #         'doctest', 'python_ta', 'random', 'typing',
-    #         'block', 'goal', 'player', 'renderer', 'math'
-    #     ],
-    #     'max-attributes': 15
-    # })
+    import python_ta
+
+    python_ta.check_all(config={
+        'allowed-io': ['print_block_indented'],
+        'allowed-import-modules': [
+            'doctest', 'python_ta', 'random', 'typing',
+            'block', 'goal', 'player', 'renderer', 'math'
+        ],
+        'max-attributes': 15
+    })
 
     # This tiny tree with one node will have no children, highlighted False,
     # and will have the provided values for level and colour; the initializer

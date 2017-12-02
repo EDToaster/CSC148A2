@@ -74,35 +74,69 @@ class BlobGoal(Goal):
         recursive backtracking maze generation algorithm
         """
 
+        # if initial block is not of self.colour, return 0
+        if board[pos[0]][pos[1]] != self.colour:
+            return 0
+
         current = pos
         stack = [None]
         count = 0
-        if board[pos[0]][pos[1]] != self.colour:
-            return count
+
+        # otherwise, start the recursive backtracking algorithm
         while current is not None:
-            x = current[0]
-            y = current[1]
+            # while current is not None
+            # (signifying that the stack has not reached the end)
+            # current is now guaranteed to be of self.colour
+
+            # get x, y values from current pos
+            x, y = current
+
+            # push current pos to the stack
             stack.append(current)
+
+            # if not visited, add to count
             if visited[x][y] == -1:
                 count += 1
+
+            # mark it as visited (of self.colour)
             visited[x][y] = 1
 
-            if y >= 1 and visited[x][y - 1] == -1 and board[x][
-                        y - 1] == self.colour:
+            # choose next block to go to:
+
+            # go up
+            if y >= 1 \
+                    and visited[x][y - 1] == -1 \
+                    and board[x][y - 1] == self.colour:
                 current = (x, y - 1)
-            elif y <= len(board) - 2 and visited[x][y + 1] == -1 and board[x][
-                        y + 1] == self.colour:
+
+            # go down
+            elif y <= len(board) - 2 \
+                    and visited[x][y + 1] == -1 \
+                    and board[x][y + 1] == self.colour:
                 current = (x, y + 1)
-            elif x >= 1 and visited[x - 1][y] == -1 and board[x - 1][
-                y] == self.colour:
+
+            # go left
+            elif x >= 1 \
+                    and visited[x - 1][y] == -1 \
+                    and board[x - 1][y] == self.colour:
                 current = (x - 1, y)
-            elif x <= len(board) - 2 and visited[x + 1][y] == -1 and \
-                    board[x + 1][y] == self.colour:
+
+            # go right
+            elif x <= len(board) - 2 \
+                    and visited[x + 1][y] == -1 \
+                    and board[x + 1][y] == self.colour:
                 current = (x + 1, y)
+
+            # if all neighbours are visited
+            # or not self.colour
+            # we backtrack and search again
             else:
+                # discard current pos
                 stack.pop()
+                # return to previous pos
                 current = stack.pop()
 
+        # return total count!
         return count
 
     def score(self, board: Block) -> int:
@@ -117,14 +151,16 @@ class BlobGoal(Goal):
         for x, item in enumerate(flattened):
             for y in range(len(item)):
                 # if current position is unchecked, check it.
-                # Since the recursive backtracker algorithm
+                # Since the recursive back-tracker algorithm
                 # is exhaustive for all cells
                 # two checks within the same blocks
                 # is guaranteed to have the same
                 # score
                 if visited[x][y] == -1:
                     current_score = max(
-                        self._undiscovered_blob_size((x, y), flattened, visited),
+                        self._undiscovered_blob_size((x, y),
+                                                     flattened,
+                                                     visited),
                         current_score)
         return current_score
 
@@ -135,13 +171,13 @@ class BlobGoal(Goal):
 
 
 class PerimeterGoal(Goal):
-    """"""
+    """A Goal to place the most blocks of your color
+    on the perimeter"""
 
     def score(self, board: Block) -> int:
         score = 0
         flat_block = board.flatten()
         block_diameter = len(flat_block)
-        scores = [0, 0, 0, 0]
 
         for i in range(block_diameter):
             if flat_block[0][i] == self.colour:

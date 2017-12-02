@@ -237,7 +237,7 @@ class RandomPlayer(Player):
 
         # add available moves
         available_actions = [
-            "LEFT-RT", "RIGHT-RT", "VERT-SW", "HORI-SW"]
+            "CCW-ROTATE", "CW-ROTATE", "VERTICAL-SWAP", "HORIZONTAL-SWAP"]
 
         # add SMASH if it is a valid move
         if self.smash_available and selected_block.level != 0:
@@ -252,14 +252,14 @@ class RandomPlayer(Player):
             self.smash_available = False
 
         # apply each move
-        elif action == "RIGHT-RT":
-            selected_block.rotate(1)
-        elif action == "LEFT-RT":
+        elif action == "CCW-ROTATE":
             selected_block.rotate(3)
-        elif action == "HORI-SW":
-            selected_block.swap(0)
-        elif action == "VERT-SW":
+        elif action == "CW-ROTATE":
+            selected_block.rotate(1)
+        elif action == "VERTICAL-SWAP":
             selected_block.swap(1)
+        elif action == "HORIZONTAL-SWAP":
+            selected_block.swap(0)
 
         # un-highlight and draw
         selected_block.highlighted = False
