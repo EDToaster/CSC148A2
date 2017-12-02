@@ -203,6 +203,12 @@ class RandomPlayer(Player):
     """A Player that chooses from 5 random moves and
     executes it.
     This player has no intelligence
+
+    === Public Attributes ===
+    smash_available:
+        is the smash move available to the player?
+        (Assuming RandomPlayer is only allowed
+        to smash once, like HumanPlayer)
     """
 
     smash_available: bool
@@ -259,12 +265,19 @@ class RandomPlayer(Player):
         selected_block.highlighted = False
         self.renderer.draw(board, self.id)
 
+        # Successful move
         return 0
 
 
 class SmartPlayer(Player):
     """A Smart player generates multiple (based on difficulty level) moves
     and selects the highest scoring move.
+
+    === Public Attributes ===
+    difficulty_level:
+        The difficulty level for the smart player.
+        This influences the number of iterations
+        when deciding a move
     """
     difficulty_level: int
 
@@ -281,8 +294,6 @@ class SmartPlayer(Player):
             50 if self.difficulty_level == 3 else \
             100 if self.difficulty_level == 4 else \
             150
-
-
 
         best_score: int = -1
         best_action: tuple
@@ -332,8 +343,8 @@ class SmartPlayer(Player):
         best_action[0](best_action[1])
 
         # Un-highlight and draw
-        self.renderer.draw(board, self.id)
         best_block.highlighted = False
+        self.renderer.draw(board, self.id)
 
 
 def choose_random_block(board: Block) -> Block:
