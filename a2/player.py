@@ -46,7 +46,6 @@ class Player:
         self.goal = goal
         self.renderer = renderer
         self.id = player_id
-        renderer.display_goal(self)
 
     def make_move(self, board: Block) -> int:
         """Choose a move to make on the given board, and apply it, mutating
@@ -98,6 +97,8 @@ class HumanPlayer(Player):
         # and _selected_block to None.
         self._level = 0
         self._selected_block = None
+
+        renderer.display_goal(self)
 
     def process_event(self, board: Block,
                       event: pygame.event.Event) -> Optional[int]:
