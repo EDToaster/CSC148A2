@@ -322,9 +322,8 @@ class Block:
             return child1_2
 
     def set_max_depth(self, max_depth: int) -> "Block":
-        """Sets the max depth of thhe block, and returns itself
-        :param max_depth: max_depth of the block
-        :return: itself
+        """Sets the max depth of the block to <max_depth>,
+        and returns itself
         """
         self.max_depth = max_depth
         return self
@@ -335,9 +334,6 @@ def rotate_list(block_list: List["Block"], n: int) -> List["Block"]:
     returns a rotated list that moves the 0th index up <n> elements
 
     (positive n: CCW, negative n: CW) in the context of the game
-
-    :param block_list: the list to rotate
-    :param n: the number of indices to move
     """
     return block_list[-n % len(block_list):] + block_list[:-n % len(block_list)]
 

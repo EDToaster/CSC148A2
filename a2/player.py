@@ -215,7 +215,7 @@ class RandomPlayer(Player):
     smash_available: bool
 
     def __init__(self, renderer: Renderer, player_id: int, goal: Goal) -> None:
-        """Initialize this HumanPlayer with the given <renderer>, <player_id>
+        """Initialize this RandomPlayer with the given <renderer>, <player_id>
         and <goal>.
         """
 
@@ -284,10 +284,16 @@ class SmartPlayer(Player):
 
     def __init__(self, renderer: Renderer, player_id: int, goal: Goal,
                  difficulty_level: int) -> None:
+        """Initialize this SmartPlayer with the given <renderer>, <player_id>
+        <difficulty>, and <goal>.
+        """
         super().__init__(renderer, player_id, goal)
         self.difficulty_level = difficulty_level
 
     def make_move(self, board: Block):
+        """Generates several moves depending on the difficluty, compares and
+        selects the best one. Executes the selected move. 1
+        """
         num_moves: int = \
             5 if self.difficulty_level == 0 else \
             10 if self.difficulty_level == 1 else \
@@ -349,12 +355,12 @@ class SmartPlayer(Player):
 
 
 def choose_random_block(board: Block) -> Block:
-    """Chooses a random block from the board, excluding
+    """Chooses and returns random block from the board, excluding most
     useless moves.
     """
     # This function does not simply pick a random block,
     # the algorithm was adjusted to exclude some but not all useless moves,
-    # in order to make the random plays seem more "organic"
+    # in order to make the plays seem more "organic"
     #
     # The function will never select the deepest block, even though some useless
     # moves will still be done. Some blocks are intentionally and indirectly

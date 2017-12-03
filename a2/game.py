@@ -205,4 +205,4 @@ if __name__ == '__main__':
             'block', 'goal', 'player', 'renderer'
         ],
     })
-    two_player_custom_game()
+    random_game()
