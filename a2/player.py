@@ -360,6 +360,8 @@ def choose_random_block(board: Block) -> Block:
     # moves will still be done. Some blocks are intentionally and indirectly
     # prioritized.
 
+    # The following approach was approved by an instructor
+
     action = random.randint(0, 4)
 
     if action == 4 or not board.children:
@@ -368,7 +370,8 @@ def choose_random_block(board: Block) -> Block:
             # makes it look boring
             return board.children[random.randint(0, 3)]
         else:
-            # this allows the "root block" to still be picked some times
+            # This allows the "root block" to still be picked some times
+            # This also prevents deepest blocks to be selected.
             return board.parent
     else:
         return choose_random_block(board.children[action])

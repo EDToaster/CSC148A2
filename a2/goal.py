@@ -73,70 +73,43 @@ class BlobGoal(Goal):
         Uses a depth first search with a
         recursive backtracking maze generation algorithm
         """
+        pos_x, pos_y = pos
 
-        # if initial block is not of self.colour, return 0
-        if board[pos[0]][pos[1]] != self.colour:
+        # return 0 if already visited
+        if visited[pos_x][pos_y] != -1:
             return 0
 
-        current = pos
-        stack = [None]
         count = 0
 
-        # otherwise, start the recursive backtracking algorithm
-        while current is not None:
-            # while current is not None
-            # (signifying that the stack has not reached the end)
-            # current is now guaranteed to be of self.colour
+        # add to count if is colour
+        if board[pos_x][pos_y] == self.colour:
+            count += 1
+            visited[pos_x][pos_y] = 1
+        else:
+            visited[pos_x][pos_y] = 0
+            return count
 
-            # get x, y values from current pos
-            x, y = current
+        # check if neighbour is a valid location
+        left = pos_x >= 1
+        right = pos_x <= len(board) - 2
+        up = pos_y >= 1
+        down = pos_y <= len(board) - 2
 
-            # push current pos to the stack
-            stack.append(current)
+        # add neighbours to check
+        neighbours = []
+        if left:
+            neighbours.append((pos_x - 1, pos_y))
+        if right:
+            neighbours.append((pos_x + 1, pos_y))
+        if up:
+            neighbours.append((pos_x, pos_y - 1))
+        if down:
+            neighbours.append((pos_x, pos_y + 1))
 
-            # if not visited, add to count
-            if visited[x][y] == -1:
-                count += 1
+        # check each neighbour. Depth First
+        for pos_new in neighbours:
+            count += self._undiscovered_blob_size(pos_new, board, visited)
 
-            # mark it as visited (of self.colour)
-            visited[x][y] = 1
-
-            # choose next block to go to:
-
-            # go up
-            if y >= 1 \
-                    and visited[x][y - 1] == -1 \
-                    and board[x][y - 1] == self.colour:
-                current = (x, y - 1)
-
-            # go down
-            elif y <= len(board) - 2 \
-                    and visited[x][y + 1] == -1 \
-                    and board[x][y + 1] == self.colour:
-                current = (x, y + 1)
-
-            # go left
-            elif x >= 1 \
-                    and visited[x - 1][y] == -1 \
-                    and board[x - 1][y] == self.colour:
-                current = (x - 1, y)
-
-            # go right
-            elif x <= len(board) - 2 \
-                    and visited[x + 1][y] == -1 \
-                    and board[x + 1][y] == self.colour:
-                current = (x + 1, y)
-
-            # if all neighbours are visited
-            # or not self.colour
-            # we backtrack and search again
-            else:
-                # discard current pos
-                stack.pop()
-                # return to previous pos
-                current = stack.pop()
-
-        # return total count!
         return count
 
     def score(self, board: Block) -> int:
